@@ -8,7 +8,7 @@ function createWindow() {
     width: 1000,
     height: 550,
     webPreferences: {
-      preload: path.join(__dirname, 'lib/pn532-spi.js'),
+      preload: path.join(__dirname, 'preload.js'),
     },
   });
 

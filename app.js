@@ -12,13 +12,17 @@ import {
   Operation,
   Asset,
 } from 'stellar-sdk';
+import PN532 from './lib/pn532-spi';
 
-const pn532 = new window.PN532({
+const pn532 = new PN532({
   clock: 40,
   mosi: 38,
   miso: 35,
   client: 36,
 });
+// Will throw an error if PN532 is unresponsive or misconfigured
+let version = pn532.getFirmwareVersion();
+console.log('PN532 Firmware version: ', version[1] + '.' + version[2]);
 // Configure PN532 for Mifare cards
 pn532.samConfiguration();
 
@@ -209,12 +213,11 @@ function reset() {
   keyboard.clearInput();
 }
 
-function readDataFromCard(uid, callback) {
+function readCard(uid, blocksToRead) {
   const key = [0xff, 0xff, 0xff, 0xff, 0xff, 0xff];
   const MIFARE_CMD_AUTH_A = 0x60;
-  const blocksToRead = 15;
-  const bufArray = [];
 
+  let bufArray = [];
   // Read available blocks
   let sector = 2;
   let block = 0;
@@ -228,7 +231,7 @@ function readDataFromCard(uid, callback) {
         key
       );
       if (!authenticated) {
-        console.log('Authentication failed!');
+        throw new Error('Authentication failed!');
       }
     }
     bufArray.push(pn532.mifareClassicReadBlock(absBlock));
@@ -246,8 +249,7 @@ function readDataFromCard(uid, callback) {
     stringArray.push(Buffer.from(buf));
   }
 
-  encryptedSecret = stringArray.join('');
-  callback();
+  return stringArray.join('');
 }
 
 document.getElementById('cancel-button').addEventListener('click', reset);
@@ -262,33 +264,42 @@ document.getElementById('charge-button').addEventListener('click', () => {
   document.getElementById('cancel-button').style.display = 'block';
   document.getElementById('separator').style.display = 'block';
 
-  function callback() {
-    keyboard.setOptions({
-      theme: defaultTheme,
-      layoutName: 'pincode',
-    });
-    document.getElementById('amount-text-field-container').style.display =
-      'none';
-    document.getElementById('pincode-text-field-container').style.display =
-      'block';
-    document.getElementById('pincode-input').focus();
-  }
-
   stopScan = false;
+  // Poll until we get a response and print the UID
   let uid = null;
-  function scanCard() {
+  function scan() {
     if (stopScan) {
       return;
-    } else if (uid === null) {
+    }
+    if (uid === null) {
       console.log('Waiting for scan...');
       uid = pn532.readPassiveTarget();
-      setTimeout(scanCard, 0);
+      setTimeout(scan, 0);
     } else {
-      console.log('Found UID', uid);
-      readDataFromCard(callback);
+      console.log('Found UID: ', uid);
+      const blocksWritten = 15;
+      try {
+        encryptedSecret = readCard(uid, blocksWritten);
+        console.log('Data read:', encryptedSecret);
+
+        keyboard.setOptions({
+          theme: defaultTheme,
+          layoutName: 'pincode',
+        });
+        document.getElementById('amount-text-field-container').style.display =
+          'none';
+        document.getElementById('pincode-text-field-container').style.display =
+          'block';
+        document.getElementById('pincode-input').focus();
+      } catch (error) {
+        console.error(error);
+        uid = null;
+        setTimeout(scan, 0);
+      }
     }
   }
-  setTimeout(scanCard, 2000);
+
+  setTimeout(scan, 2000);
 });
 
 document.querySelectorAll('input').forEach((input) => {
