@@ -12,6 +12,7 @@
     "@material/textfield": "^11.0.0",
     "@material/theme": "^11.0.0",
     "electron": "^4.2.12",
+    "rpi-softspi": "^1.0.5",
     "simple-keyboard": "^3.0.46",
     "sjcl": "^1.0.8",
     "stellar-sdk": "^8.1.1"

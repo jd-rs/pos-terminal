@@ -12,6 +12,7 @@ import {
   Operation,
   Asset,
 } from 'stellar-sdk';
+import PN532 from './lib/pn532-spi';
 
 const server = new Server('https://horizon-testnet.stellar.org');
 const destinationId =
