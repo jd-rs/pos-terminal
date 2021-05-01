@@ -5,8 +5,11 @@ const path = require('path');
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 500,
+    width: 1000,
+    height: 550,
+    webPreferences: {
+      preload: path.join(__dirname, 'lib/pn532-spi.js'),
+    },
   });
 
   // and load the index.html of the app.

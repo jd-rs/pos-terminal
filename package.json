@@ -8,7 +8,6 @@
     "@material/circular-progress": "^11.0.0",
     "@material/ripple": "^11.0.0",
     "@material/select": "^11.0.0",
-    "@material/snackbar": "^11.0.0",
     "@material/textfield": "^11.0.0",
     "@material/theme": "^11.0.0",
     "electron": "^4.2.12",
@@ -19,6 +18,7 @@
   },
   "devDependencies": {
     "css-loader": "^5.2.4",
+    "electron-rebuild": "^2.3.5",
     "fibers": "^5.0.0",
     "mini-css-extract-plugin": "^1.5.0",
     "sass": "^1.32.11",

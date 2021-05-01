@@ -12,7 +12,15 @@ import {
   Operation,
   Asset,
 } from 'stellar-sdk';
-import PN532 from './lib/pn532-spi';
+
+const pn532 = new window.PN532({
+  clock: 40,
+  mosi: 38,
+  miso: 35,
+  client: 36,
+});
+// Configure PN532 for Mifare cards
+pn532.samConfiguration();
 
 const server = new Server('https://horizon-testnet.stellar.org');
 const destinationId =
@@ -29,6 +37,7 @@ let destinationAmount = 0;
 let minAmount = Infinity;
 let path = [];
 let sourceBalances = {};
+let stopScan = false;
 
 const amountTextField = new MDCTextField(
   document.getElementById('amount-text-field')
@@ -126,76 +135,6 @@ async function handlePincodeInput(pincode) {
   }
 }
 
-function reset() {
-  keyboard.clearInput();
-  keyboard.setOptions({
-    theme: defaultTheme,
-    layoutName: 'default',
-  });
-
-  document.getElementById('amount-text-field-container').style.display =
-    'block';
-  document.getElementById('charge-button').style.display = 'block';
-  document.getElementById('nfc-svg').style.display = 'flex';
-
-  document.getElementById('pincode-text-field-container').style.display =
-    'none';
-  document.getElementById('asset-select').style.display = 'none';
-
-  document.getElementById('separator').style.display = 'none';
-  document.getElementById('pay-button').style.display = 'none';
-
-  document.getElementById('amount-to-pay').style.display = 'none';
-  document.getElementById('error-response').style.display = 'none';
-  document.getElementById('success-response').style.display = 'none';
-
-  document.getElementById('asset-list').innerHTML = '';
-
-  document.getElementById('amount-input').focus();
-  document.getElementById('amount-input').value = '';
-  document.getElementById('pincode-input').value = '';
-  keyboard.clearInput();
-}
-
-document.getElementById('cancel-button').addEventListener('click', reset);
-
-document.getElementById('charge-button').addEventListener('click', () => {
-  destinationAmount = document.getElementById('amount-input').value;
-
-  keyboard.setOptions({
-    theme: `${defaultTheme} hide-keyboard`,
-  });
-  document.getElementById('charge-button').style.display = 'none';
-  document.getElementById('cancel-button').style.display = 'block';
-  document.getElementById('separator').style.display = 'block';
-
-  console.log('scanning nfc');
-  encryptedSecret =
-    '{"iv":"FZxZujhgyaSGmjbLGBkXfw==","v":1,"iter":10000,"ks":128,"ts":64,"mode":"ccm","adata":"","cipher":"aes","salt":"xm+bsFuNFbc=","ct":"3SgORdllAZOjy5Ja3XPq/zz5QKZIWNASK2ygHYiCjU5RQ3Lyqk3ksUuAC3EpECT51VVuO66wF7OAF1l2awSavA=="}';
-
-  setTimeout(() => {
-    keyboard.setOptions({
-      theme: defaultTheme,
-      layoutName: 'pincode',
-    });
-    document.getElementById('amount-text-field-container').style.display =
-      'none';
-    document.getElementById('pincode-text-field-container').style.display =
-      'block';
-    document.getElementById('pincode-input').focus();
-  }, 1000);
-});
-
-document.querySelectorAll('input').forEach((input) => {
-  input.addEventListener('focus', (event) => {
-    selectedInput = document.getElementById(event.target.id);
-
-    keyboard.setOptions({
-      inputName: event.target.id,
-    });
-  });
-});
-
 async function getAmountToPay(assetValue) {
   const [assetCode, assetIssuer] = assetValue.split('-');
   if (assetCode === 'XLM') {
@@ -236,6 +175,131 @@ async function getAmountToPay(assetValue) {
     document.querySelector('#error-response span').innerHTML = error;
   }
 }
+
+function reset() {
+  stopScan = true;
+
+  keyboard.clearInput();
+  keyboard.setOptions({
+    theme: defaultTheme,
+    layoutName: 'default',
+  });
+
+  document.getElementById('amount-text-field-container').style.display =
+    'block';
+  document.getElementById('charge-button').style.display = 'block';
+  document.getElementById('nfc-svg').style.display = 'flex';
+
+  document.getElementById('pincode-text-field-container').style.display =
+    'none';
+  document.getElementById('asset-select').style.display = 'none';
+
+  document.getElementById('separator').style.display = 'none';
+  document.getElementById('pay-button').style.display = 'none';
+
+  document.getElementById('amount-to-pay').style.display = 'none';
+  document.getElementById('error-response').style.display = 'none';
+  document.getElementById('success-response').style.display = 'none';
+
+  document.getElementById('asset-list').innerHTML = '';
+
+  document.getElementById('amount-input').focus();
+  document.getElementById('amount-input').value = '';
+  document.getElementById('pincode-input').value = '';
+  keyboard.clearInput();
+}
+
+function readDataFromCard(uid, callback) {
+  const key = [0xff, 0xff, 0xff, 0xff, 0xff, 0xff];
+  const MIFARE_CMD_AUTH_A = 0x60;
+  const blocksToRead = 15;
+  const bufArray = [];
+
+  // Read available blocks
+  let sector = 2;
+  let block = 0;
+  for (let i = 0; i < blocksToRead; i++) {
+    const absBlock = sector * 4 + block;
+    if (block === 0) {
+      const authenticated = pn532.mifareClassicAuthenticateBlock(
+        uid,
+        absBlock,
+        MIFARE_CMD_AUTH_A,
+        key
+      );
+      if (!authenticated) {
+        console.log('Authentication failed!');
+      }
+    }
+    bufArray.push(pn532.mifareClassicReadBlock(absBlock));
+    block += 1;
+    if (block === 3) {
+      block = 0;
+      sector += 1;
+    }
+  }
+
+  // Transform Array of Buffers to string
+  const stringArray = [];
+  bufArray[blocksToRead - 1] = bufArray[blocksToRead - 1].filter((num) => num);
+  for (const buf of bufArray) {
+    stringArray.push(Buffer.from(buf));
+  }
+
+  encryptedSecret = stringArray.join('');
+  callback();
+}
+
+document.getElementById('cancel-button').addEventListener('click', reset);
+
+document.getElementById('charge-button').addEventListener('click', () => {
+  destinationAmount = document.getElementById('amount-input').value;
+
+  keyboard.setOptions({
+    theme: `${defaultTheme} hide-keyboard`,
+  });
+  document.getElementById('charge-button').style.display = 'none';
+  document.getElementById('cancel-button').style.display = 'block';
+  document.getElementById('separator').style.display = 'block';
+
+  function callback() {
+    keyboard.setOptions({
+      theme: defaultTheme,
+      layoutName: 'pincode',
+    });
+    document.getElementById('amount-text-field-container').style.display =
+      'none';
+    document.getElementById('pincode-text-field-container').style.display =
+      'block';
+    document.getElementById('pincode-input').focus();
+  }
+
+  stopScan = false;
+  let uid = null;
+  function scanCard() {
+    if (stopScan) {
+      return;
+    } else if (uid === null) {
+      console.log('Waiting for scan...');
+      uid = pn532.readPassiveTarget();
+      setTimeout(scanCard, 0);
+    } else {
+      console.log('Found UID', uid);
+      readDataFromCard(callback);
+    }
+  }
+  setTimeout(scanCard, 2000);
+});
+
+document.querySelectorAll('input').forEach((input) => {
+  input.addEventListener('focus', (event) => {
+    selectedInput = document.getElementById(event.target.id);
+
+    keyboard.setOptions({
+      inputName: event.target.id,
+    });
+  });
+});
 
 assetSelect.listen('MDCSelect:change', (event) =>
   getAmountToPay(event.detail.value)
@@ -281,7 +345,7 @@ document.getElementById('pay-button').addEventListener('click', async () => {
     document.getElementById('success-response').style.display = 'flex';
     document.getElementById('pay-button').style.display = 'none';
     document.getElementById('separator').style.display = 'block';
-    setTimeout(reset, 5000);
+    setTimeout(reset, 4000);
   } catch (error) {
     console.log(error);
     document.getElementById('error-response').style.display = 'flex';
