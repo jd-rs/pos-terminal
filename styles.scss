@@ -212,15 +212,7 @@ $select-outline: (
 }
 
 .response-status {
-  display: flex;
+  display: none;
   flex-direction: column;
   align-items: center;
-}
-
-#error-response {
-  display: none;
-}
-
-#success-response {
-  display: none;
 }

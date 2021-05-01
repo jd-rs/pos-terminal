@@ -1,11 +1,11 @@
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-
+const prod = process.env.NODE_ENV === 'production';
 module.exports = {
   target: 'electron-renderer',
-  mode: process.env.NODE_ENV !== 'production' ? 'development' : 'production',
+  mode: prod ? 'production' : 'development',
   entry: ['./styles.scss', './app.js'],
   output: {
-    filename: 'dist/bundle.js',
+    filename: prod ? 'bundle.js' : 'dist/bundle.js',
   },
   module: {
     rules: [
@@ -31,7 +31,7 @@ module.exports = {
   },
   plugins: [
     new MiniCssExtractPlugin({
-      filename: 'dist/bundle.css',
+      filename: prod ? 'bundle.css' : 'dist/bundle.css',
     }),
   ],
 };

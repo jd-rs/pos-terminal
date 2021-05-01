@@ -56,6 +56,7 @@ const circularProgress = new MDCCircularProgress(
 
 let selectedInput = document.getElementById('amount-input');
 selectedInput.focus();
+circularProgress.determinate = false;
 
 const defaultTheme =
   'hg-theme-default hg-layout-numeric numeric-theme dark-theme';
@@ -291,6 +292,7 @@ document.getElementById('charge-button').addEventListener('click', () => {
         document.getElementById('pincode-text-field-container').style.display =
           'block';
         document.getElementById('pincode-input').focus();
+        pincodeTextField.valid = true;
       } catch (error) {
         console.error(error);
         uid = null;
@@ -317,8 +319,7 @@ assetSelect.listen('MDCSelect:change', (event) =>
 );
 
 document.getElementById('pay-button').addEventListener('click', async () => {
-  circularProgress.determinate = false;
-  circularProgress.open();
+  document.getElementById('loading-response').style.display = 'flex';
   let assetPath = [];
   for (let el of path) {
     let asset = null;
@@ -362,6 +363,6 @@ document.getElementById('pay-button').addEventListener('click', async () => {
     document.getElementById('error-response').style.display = 'flex';
     document.querySelector('#error-response span').innerHTML = error;
   } finally {
-    circularProgress.close();
+    document.getElementById('loading-response').style.display = 'none';
   }
 });
