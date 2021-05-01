@@ -70,6 +70,10 @@ body {
   width: $inputWidth;
 }
 
+.mdc-select--outlined .mdc-select__anchor .mdc-select__selected-text::before {
+  content: '';
+}
+
 .mdc-button--outlined {
   @include button.ink-color(#ffffff);
   @include button.outline-color($on-background-medium);
