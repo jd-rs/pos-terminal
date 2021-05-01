@@ -1,0 +1,226 @@
+@use "@material/theme" with (
+  $primary: #ffcc80,
+  $secondary: #80ccc4,
+  $error: #cf6679,
+  $on-primary: #000,
+  $on-secondary: #000,
+);
+
+@use "simple-keyboard/build/css/index";
+
+@use "@material/floating-label/mdc-floating-label";
+@use "@material/notched-outline/mdc-notched-outline";
+@use "@material/textfield";
+@use '@material/button/mdc-button';
+@use '@material/button';
+@use "@material/ripple";
+@use "@material/circular-progress/mdc-circular-progress";
+@use "@material/circular-progress";
+
+@use "@material/list/mdc-list";
+@use "@material/menu-surface/mdc-menu-surface";
+@use "@material/menu-surface";
+@use "@material/menu/mdc-menu";
+@use "@material/select/styles";
+@use '@material/select';
+
+@include textfield.core-styles;
+
+$on-background-high: rgba(255, 255, 255, 0.87);
+$on-background-medium: rgba(255, 255, 255, 0.6);
+$on-background-disabled: rgba(255, 255, 255, 0.38);
+$primary: #ffcc80;
+$background: #121212;
+$hovered: rgba(0, 0, 0, 0);
+$pressed: rgba(0, 0, 0, 0.1);
+$focused: rgba(0, 0, 0, 0.12);
+$error: #cf6679;
+$inputWidth: 260px;
+
+body {
+  background-color: $background;
+  margin: 0;
+  font-size: large;
+  font-family: Arial, Helvetica, sans-serif;
+  color: $on-background-high;
+}
+
+.mdc-text-field {
+  @include textfield.ink-color($on-background-high);
+  @include textfield.outline-color($on-background-medium);
+  @include textfield.hover-outline-color($on-background-high);
+  @include textfield.prefix-color($on-background-high);
+  @include textfield.suffix-color($on-background-high);
+  @include textfield.label-color($on-background-medium);
+
+  width: $inputWidth;
+
+  &.mdc-text-field--focused {
+    @include textfield.label-color($primary);
+  }
+
+  &.mdc-text-field--invalid {
+    @include textfield.label-color($error);
+    @include textfield.outline-color($error);
+    @include textfield.caret-color($error);
+  }
+}
+
+.mdc-select__anchor {
+  width: $inputWidth;
+}
+
+.mdc-button--outlined {
+  @include button.ink-color(#ffffff);
+  @include button.outline-color($on-background-medium);
+}
+
+.mdc-circular-progress {
+  @include circular-progress.color($on-background-high);
+}
+
+$select-outline: (
+  'default': $on-background-medium,
+  'hover': $on-background-high,
+);
+
+.mdc-select {
+  @include select.ink-color($on-background-high);
+  @include select.outline-color($select-outline);
+  @include select.label-color($on-background-medium);
+  @include select.dropdown-icon-color($on-background-high);
+
+  display: none;
+}
+
+.mdc-menu-surface {
+  @include menu-surface.ink-color($on-background-high);
+  @include menu-surface.fill-color(lighten($background, 12%));
+}
+
+#container {
+  box-sizing: border-box;
+  height: 45vh;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+
+  button {
+    width: 110px;
+    height: 48px;
+  }
+
+  #pincode-text-field-container {
+    display: none;
+  }
+
+  .mdc-button__ripple {
+    @include ripple.states-opacities(
+      (
+        hover: 0.04,
+        focus: 0.12,
+        press: 0.1,
+      )
+    );
+    &.white {
+      @include ripple.states-base-color(#ffffff);
+    }
+  }
+
+  .buttons-container {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+
+    #pay-button {
+      display: none;
+    }
+
+    #cancel-button {
+      @include button.ink-color(#ffffff);
+    }
+
+    #separator {
+      display: none;
+      visibility: hidden;
+    }
+  }
+}
+
+/*
+    Theme: numeric
+  */
+.numeric-theme {
+  max-height: 300px;
+  max-width: 320px;
+  margin: 0 auto;
+  position: absolute;
+  bottom: 0;
+  -webkit-transition: max-height 0.2s linear;
+  transition: max-height 0.2s linear;
+}
+
+.numeric-theme + .simple-keyboard-preview {
+  max-width: 320px;
+}
+
+.simple-keyboard.hg-theme-default.numeric-theme
+  .hg-button.hg-standardBtn.hg-button-at {
+  max-width: none;
+}
+
+/*
+  Theme: dark
+*/
+.simple-keyboard.dark-theme {
+  background-color: lighten($background, 5%);
+  border-radius: 0;
+  border-top-right-radius: 5px;
+  border-top-left-radius: 5px;
+
+  .hg-button {
+    background-color: lighten($background, 12%);
+    color: $on-background-high;
+    border: none;
+
+    &:active {
+      background: lighten($background, 22%);
+    }
+  }
+}
+
+.hide-keyboard {
+  max-height: 0;
+  -webkit-transition: max-height 0.2s linear;
+  transition: max-height 0.2s linear;
+}
+
+#nfc-svg {
+  height: 55vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#amount-to-pay {
+  font-size: x-large;
+  text-align: center;
+  margin: 10px;
+  display: none;
+}
+
+.response-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#error-response {
+  display: none;
+}
+
+#success-response {
+  display: none;
+}

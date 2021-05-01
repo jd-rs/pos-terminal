@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="dist/bundle.css" />
+  </head>
+  <body>
+    <div id="container">
+      <div id="amount-text-field-container">
+        <label
+          class="mdc-text-field mdc-text-field--outlined"
+          id="amount-text-field"
+        >
+          <span class="mdc-notched-outline">
+            <span class="mdc-notched-outline__leading"></span>
+            <span class="mdc-notched-outline__notch">
+              <span class="mdc-floating-label">Amount</span>
+            </span>
+            <span class="mdc-notched-outline__trailing"></span>
+          </span>
+          <span class="mdc-text-field__affix mdc-text-field__affix--prefix"
+            >$</span
+          >
+          <input type="text" class="mdc-text-field__input" id="amount-input" />
+          <span class="mdc-text-field__affix mdc-text-field__affix--suffix"
+            >USD</span
+          >
+        </label>
+      </div>
+
+      <div class="mdc-select mdc-select--outlined" id="asset-select">
+        <div class="mdc-select__anchor" aria-labelledby="outlined-select-label">
+          <span class="mdc-notched-outline">
+            <span class="mdc-notched-outline__leading"></span>
+            <span class="mdc-notched-outline__notch">
+              <span id="outlined-select-label" class="mdc-floating-label"
+                >Pay with</span
+              >
+            </span>
+            <span class="mdc-notched-outline__trailing"></span>
+          </span>
+          <span class="mdc-select__selected-text-container">
+            <span id="selected-text" class="mdc-select__selected-text"></span>
+          </span>
+          <span class="mdc-select__dropdown-icon">
+            <svg
+              class="mdc-select__dropdown-icon-graphic"
+              viewBox="7 10 10 5"
+              focusable="false"
+            >
+              <polygon
+                class="mdc-select__dropdown-icon-inactive"
+                stroke="none"
+                fill-rule="evenodd"
+                points="7 10 12 15 17 10"
+              ></polygon>
+              <polygon
+                class="mdc-select__dropdown-icon-active"
+                stroke="none"
+                fill-rule="evenodd"
+                points="7 15 12 10 17 15"
+              ></polygon>
+            </svg>
+          </span>
+        </div>
+
+        <div
+          class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth"
+        >
+          <ul
+            class="mdc-list"
+            role="listbox"
+            aria-label="Asset picker listbox"
+            id="asset-list"
+          ></ul>
+        </div>
+      </div>
+
+      <div id="pincode-text-field-container">
+        <label
+          class="mdc-text-field mdc-text-field--outlined"
+          id="pincode-text-field"
+        >
+          <span class="mdc-notched-outline">
+            <span class="mdc-notched-outline__leading"></span>
+            <span class="mdc-notched-outline__notch">
+              <span class="mdc-floating-label">Pincode</span>
+            </span>
+            <span class="mdc-notched-outline__trailing"></span>
+          </span>
+          <input
+            type="password"
+            class="mdc-text-field__input"
+            id="pincode-input"
+          />
+        </label>
+        <div class="mdc-text-field-helper-line">
+          <div
+            class="mdc-text-field-helper-text mdc-text-field-helper-text--validation-msg error"
+            id="error"
+            aria-hidden="true"
+          ></div>
+        </div>
+      </div>
+
+      <div class="buttons-container">
+        <button class="mdc-button" id="cancel-button">
+          <span class="mdc-button__ripple white"></span>
+          <span class="mdc-button__label">Cancel</span>
+        </button>
+
+        <button class="mdc-button mdc-button--raised" id="charge-button">
+          <span class="mdc-button__ripple"></span>
+          <span class="mdc-button__label" id="charge-button-text">Charge</span>
+        </button>
+
+        <button id="separator"></button>
+
+        <button class="mdc-button mdc-button--raised" id="pay-button">
+          <span class="mdc-button__ripple"></span>
+          <span class="mdc-button__label" id="charge-button-text">Pay</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="nfc-svg">
+      <img src="assets/nfc.svg" />
+    </div>
+    <div id="amount-to-pay">$ 24.3450000 XLM</div>
+    <div class="response-status" id="error-response">
+      <img src="assets/error.svg" />
+      <span>Not enough funds!</span>
+    </div>
+    <div class="response-status" id="success-response">
+      <img src="assets/check.svg" />
+      <div>Payment successful!</div>
+    </div>
+    <div class="response-status" id="loading-response">
+      <div
+        class="mdc-circular-progress"
+        style="width: 48px; height: 48px"
+        role="progressbar"
+        aria-label="Example Progress Bar"
+        aria-valuemin="0"
+        aria-valuemax="1"
+      >
+        <div class="mdc-circular-progress__determinate-container">
+          <svg
+            class="mdc-circular-progress__determinate-circle-graphic"
+            viewBox="0 0 48 48"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              class="mdc-circular-progress__determinate-track"
+              cx="24"
+              cy="24"
+              r="18"
+              stroke-width="4"
+            />
+            <circle
+              class="mdc-circular-progress__determinate-circle"
+              cx="24"
+              cy="24"
+              r="18"
+              stroke-dasharray="113.097"
+              stroke-dashoffset="113.097"
+              stroke-width="4"
+            />
+          </svg>
+        </div>
+        <div class="mdc-circular-progress__indeterminate-container">
+          <div class="mdc-circular-progress__spinner-layer">
+            <div
+              class="mdc-circular-progress__circle-clipper mdc-circular-progress__circle-left"
+            >
+              <svg
+                class="mdc-circular-progress__indeterminate-circle-graphic"
+                viewBox="0 0 48 48"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle
+                  cx="24"
+                  cy="24"
+                  r="18"
+                  stroke-dasharray="113.097"
+                  stroke-dashoffset="56.549"
+                  stroke-width="4"
+                />
+              </svg>
+            </div>
+            <div class="mdc-circular-progress__gap-patch">
+              <svg
+                class="mdc-circular-progress__indeterminate-circle-graphic"
+                viewBox="0 0 48 48"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle
+                  cx="24"
+                  cy="24"
+                  r="18"
+                  stroke-dasharray="113.097"
+                  stroke-dashoffset="56.549"
+                  stroke-width="3.2"
+                />
+              </svg>
+            </div>
+            <div
+              class="mdc-circular-progress__circle-clipper mdc-circular-progress__circle-right"
+            >
+              <svg
+                class="mdc-circular-progress__indeterminate-circle-graphic"
+                viewBox="0 0 48 48"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle
+                  cx="24"
+                  cy="24"
+                  r="18"
+                  stroke-dasharray="113.097"
+                  stroke-dashoffset="56.549"
+                  stroke-width="4"
+                />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="simple-keyboard"></div>
+
+    <script src="dist/bundle.js" async></script>
+  </body>
+</html>
