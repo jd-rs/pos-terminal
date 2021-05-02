@@ -141,6 +141,8 @@ async function handlePincodeInput(pincode) {
 }
 
 async function getAmountToPay(assetValue) {
+  document.getElementById('error-response').style.display = 'none';
+
   const [assetCode, assetIssuer] = assetValue.split('-');
   if (assetCode === 'XLM') {
     sourceAsset = Asset.native();
@@ -324,9 +326,9 @@ document.getElementById('pay-button').addEventListener('click', async () => {
   for (let el of path) {
     let asset = null;
     if (el.asset_type === 'native') {
-      asset = StellarSdk.Asset.native();
+      asset = Asset.native();
     } else {
-      asset = new StellarSdk.Asset(el.asset_code, el.asset_issuer);
+      asset = new Asset(el.asset_code, el.asset_issuer);
     }
     assetPath.push(asset);
   }
